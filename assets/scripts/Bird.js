@@ -20,9 +20,9 @@ cc.Class({
 
     properties: {
         /** 上抛初速度，单位：像素/秒 */
-        initRiseSpeed: 800,
+        initRiseSpeed: 400,
         /** 重力加速度，单位：像素/秒的平方 */
-        gravity: 1000,
+        gravity: 100,
         /** 小鸟的状态 */
         state: {
             default: State.Ready,
@@ -64,6 +64,7 @@ cc.Class({
         this.rise();
     },
 
+    /** 获取到下一水管 */
     _getNextPipe () {
         this.nextPipe = this.game.pipeManager.getNext();
     },
@@ -78,6 +79,7 @@ cc.Class({
         this._fixBirdFinalPosition();
     },
 
+    /** 更新位置 */
     _updatePosition (dt) {
         var flying = this.state === State.Rise
             || this.state === State.FreeFall
@@ -88,15 +90,16 @@ cc.Class({
         }
     },
 
+    /** 更新状态 */
     _updateState (dt) {
         switch (this.state) {
-            case State.Rise:
+            case State.Rise: //上升
                 if (this.currentSpeed < 0) {
                     this.state = State.FreeFall;
                     this._runFallAction();
                 }
                 break;
-            case State.Drop:
+            case State.Drop: //坠落
                 if (this._detectCollisionWithBird(this.ground)) {
                     this.state = State.Dead;
                 }
@@ -104,6 +107,7 @@ cc.Class({
         }
     },
 
+    /** 检测碰撞 */
     _detectCollision () {
         if (!this.nextPipe) {
             return;
@@ -159,7 +163,9 @@ cc.Class({
         }
     },
 
+    /**  检测是否碰撞*/
     _detectCollisionWithBird(otherNode){
+        //检测一个矩形和另一个矩形是否有接触的地方，如果有接触，证明碰撞了，就执行碰撞逻辑
         return cc.rectIntersectsRect(this.node.getBoundingBoxToWorld(), otherNode.getBoundingBoxToWorld());
     },
 
@@ -170,18 +176,21 @@ cc.Class({
         cc.audioEngine.playEffect(this.riseAudio);
     },
 
+    /** 执行上升逻辑 */
     _runRiseAction(){
         this.node.stopAllActions();
         let jumpAction = cc.rotateTo(0.3, -30).easing(cc.easeCubicActionOut());
         this.node.runAction(jumpAction);
     },
 
+    /** 执行碰撞逻辑 */
     _runFallAction(duration = 0.6){
         this.node.stopAllActions();
         let dropAction = cc.rotateTo(duration, 90).easing(cc.easeCubicActionIn());
         this.node.runAction(dropAction);
     },
 
+    /** 坠落逻辑 */
     _runDropAction(){
         if (this.currentSpeed > 0) {
             this.currentSpeed = 0;

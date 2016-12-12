@@ -57,9 +57,15 @@ cc.Class({
         this._revealScene();
     },
 
+    /** 重新加载场景 */
     _revealScene(){
-        this.maskLayer.active = true;
+        this.maskLayer.active = true; //状态改为true 可点击可触发
         this.maskLayer.color = cc.Color.BLACK;
+        /**
+         * 执行并返回该执行的动作。该节点将会变成动作的目标。<br/>
+		 * 调用 runAction 时，节点自身处于不激活状态将不会有任何效果。<br/>
+		 * 注意：你不应该修改 runAction 后的动作，将无法发挥作用，如果想进行修改，请在定义 action 时加入。
+         */
         this.maskLayer.runAction(cc.fadeOut(0.3));
     },
 
@@ -68,9 +74,10 @@ cc.Class({
         cc.audioEngine.playEffect(this.swooshingAudio);
         this.maskLayer.color = cc.Color.BLACK;
         this.maskLayer.runAction(
+            //顺序执行动作，创建的动作将按顺序依次运行。
             cc.sequence(
-                cc.fadeIn(0.3),
-                cc.callFunc(()=> {
+                cc.fadeIn(0.3),//渐显效果
+                cc.callFunc(()=> {//执行回调函数
                     // 重新加载场景
                     cc.director.loadScene('game');
                 }, this)
@@ -78,12 +85,14 @@ cc.Class({
         );
     },
 
+    /** 开始游戏 */
     _gameStart(){
         this._hideReadyMenu();
         this.pipeManager.startSpawn();
         this.bird.startFly();
     },
 
+    /** 游戏结束 */
     gameOver () {
         this.pipeManager.reset();
         this.ground.getComponent(Scroller).stopScroll();
@@ -92,12 +101,14 @@ cc.Class({
         this._showGameOverMenu();
     },
 
+    /** 获取分数 */
     gainScore () {
         this.score++;
         this.scoreLabel.string = this.score;
         cc.audioEngine.playEffect(this.scoreAudio);
     },
 
+    /** 隐藏Ready menu */
     _hideReadyMenu(){
         this.scoreLabel.node.runAction(cc.fadeIn(0.3));
         this.readyMenu.runAction(
@@ -121,6 +132,7 @@ cc.Class({
         );
     },
 
+    /** 显示游戏结束的MENU */
     _showGameOverMenu(){
         // 隐藏分数
         this.scoreLabel.node.runAction(
@@ -198,6 +210,7 @@ cc.Class({
         this.scheduleOnce(showNodeFunc, 0.55);
     },
 
+    /** 开始游戏或者移动小鸟 */
     _startGameOrJumpBird(){
         if (this.bird.state === Bird.State.Ready) {
             this._gameStart();
