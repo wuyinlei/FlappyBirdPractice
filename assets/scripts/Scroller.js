@@ -22,10 +22,12 @@ cc.Class({
         }
     },
 
+    //停止滑动
     stopScroll (){
         this.canScroll = false;
     },
 
+    //开始滑动
     startScroll(){
         this.canScroll = true;
     }

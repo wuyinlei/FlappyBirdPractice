@@ -48,13 +48,14 @@ cc.Class({
         }
     },
 
+    /** init some data first */
     onLoad() {
-        this.score = 0;
-        this.scoreLabel.string = this.score;
-        this.bird.init(this);
-        this._enableInput(true);
-        this._registerInput();
-        this._revealScene();
+        this.score = 0; //分数置零
+        this.scoreLabel.string = this.score; //显示当前分数
+        this.bird.init(this); //初始化小鸟对象  参数是game当前对象
+        this._enableInput(true); //设置屏幕 或者按键可以点击  对后面的监听做准备
+        this._registerInput(); //注册监听
+        this._revealScene(); // 
     },
 
     /** 重新加载场景 */
@@ -87,25 +88,25 @@ cc.Class({
 
     /** 开始游戏 */
     _gameStart(){
-        this._hideReadyMenu();
-        this.pipeManager.startSpawn();
-        this.bird.startFly();
+        this._hideReadyMenu();  //隐藏运行Menu
+        this.pipeManager.startSpawn(); //开始产生管道
+        this.bird.startFly(); //开始起飞
     },
 
     /** 游戏结束 */
     gameOver () {
         this.pipeManager.reset();
         this.ground.getComponent(Scroller).stopScroll();
-        this._enableInput(false);
-        this._blinkOnce();
-        this._showGameOverMenu();
+        this._enableInput(false); //根据这个标志来管理是否恢复还是暂停所有监听器事件
+        this._blinkOnce(); //闪屏
+        this._showGameOverMenu(); //显示游戏结束Menu
     },
 
     /** 获取分数 */
     gainScore () {
-        this.score++;
-        this.scoreLabel.string = this.score;
-        cc.audioEngine.playEffect(this.scoreAudio);
+        this.score++; //分数自加
+        this.scoreLabel.string = this.score; //把值赋给label
+        cc.audioEngine.playEffect(this.scoreAudio); //执行得分
     },
 
     /** 隐藏Ready menu */
@@ -113,7 +114,7 @@ cc.Class({
         this.scoreLabel.node.runAction(cc.fadeIn(0.3));
         this.readyMenu.runAction(
             cc.sequence(
-                cc.fadeOut(0.5),
+                cc.fadeOut(0.5), //渐隐效果
                 cc.callFunc(()=> {
                     this.readyMenu.active = false;
                 }, this)
@@ -126,8 +127,8 @@ cc.Class({
         this.maskLayer.color = cc.Color.WHITE;
         this.maskLayer.runAction(
             cc.sequence(
-                cc.fadeTo(0.1, 200),
-                cc.fadeOut(0.1)
+                cc.fadeTo(0.1, 200), //修改透明度到指定值
+                cc.fadeOut(0.1) //渐隐效果
             )
         );
     },
@@ -145,18 +146,19 @@ cc.Class({
         );
 
         // 获取游戏结束界面的各个节点
-        let gameOverNode = this.gameOverMenu.getChildByName("gameOverLabel");
-        let resultBoardNode = this.gameOverMenu.getChildByName("resultBoard");
-        let startButtonNode = this.gameOverMenu.getChildByName("startButton");
-        let currentScoreNode = resultBoardNode.getChildByName("currentScore");
-        let bestScoreNode = resultBoardNode.getChildByName("bestScore");
-        let medalNode = resultBoardNode.getChildByName("medal");
+        let gameOverNode = this.gameOverMenu.getChildByName("gameOverLabel"); //游戏结束节点
+        let resultBoardNode = this.gameOverMenu.getChildByName("resultBoard"); //结果节点
+        let startButtonNode = this.gameOverMenu.getChildByName("startButton"); //开始按钮节点
+        let currentScoreNode = resultBoardNode.getChildByName("currentScore"); //当前分数节点
+        let bestScoreNode = resultBoardNode.getChildByName("bestScore"); // 最好分数节点
+        let medalNode = resultBoardNode.getChildByName("medal"); //奖牌节点
 
         // 保存最高分到本地
         const KEY_BEST_SCORE = "bestScore";
+        //cc.sys.localStorage   本地存储组件
         let bestScore = cc.sys.localStorage.getItem(KEY_BEST_SCORE);
-        if (bestScore === "null" || this.score > bestScore) {
-            bestScore = this.score;
+        if (bestScore === "null" || this.score > bestScore) { //如果本地没有最高分记录，或者当前分高于本地存储的最高分
+            bestScore = this.score; // 当前分替换最高分记录
         }
         cc.sys.localStorage.setItem(KEY_BEST_SCORE, bestScore);
 
@@ -193,21 +195,22 @@ cc.Class({
         let showNodeFunc = ()=> showNode(
             gameOverNode,
             cc.spawn(
-                cc.fadeIn(0.2),
-                cc.sequence(
+                cc.fadeIn(0.2), //渐显效果
+                cc.sequence( //顺序执行动作，创建的动作将按顺序依次运行。
                     cc.moveBy(0.2, cc.p(0, 10)),
                     cc.moveBy(0.5, cc.p(0, -10))
                 )
             ),
             ()=>showNode(
                 resultBoardNode,
+                //移动到目标位置       时间间隔动作，这种动作在已定时间内完成
                 cc.moveTo(0.5, cc.p(resultBoardNode.x, -250)).easing(cc.easeCubicActionOut()),
                 ()=>showNode(
                     startButtonNode,
                     cc.fadeIn(0.5))
             )
         );
-        this.scheduleOnce(showNodeFunc, 0.55);
+        this.scheduleOnce(showNodeFunc, 0.55); //调度一个指运行一次的回调函数
     },
 
     /** 开始游戏或者移动小鸟 */
@@ -219,15 +222,20 @@ cc.Class({
         }
     },
 
+    //注册监听
     _registerInput () {
+        //将事件监听器添加到事件管理器中
         cc.eventManager.addListener({
-            event: cc.EventListener.KEYBOARD,
+            event: cc.EventListener.KEYBOARD, //键盘事件监听
             onKeyPressed: function (keyCode, event) {
                 this._startGameOrJumpBird();
             }.bind(this)
         }, this.node);
+        //将事件监听器添加到事件管理器中。<br/>
+		//如果参数 “nodeOrPriority” 是节点，优先级由 node 的渲染顺序决定，显示在上层的节点将优先收到事件。<br/>
+		//如果参数 “nodeOrPriority” 是数字，优先级则固定为该参数的数值，数字越小，优先级越高。<br/>
         cc.eventManager.addListener({
-            event: cc.EventListener.TOUCH_ONE_BY_ONE,
+            event: cc.EventListener.TOUCH_ONE_BY_ONE, //多点触摸事件监听
             onTouchBegan: function (touch, event) {
                 this._startGameOrJumpBird();
                 return true;
@@ -237,9 +245,11 @@ cc.Class({
 
     _enableInput: function (enable) {
         if (enable) {
-            cc.eventManager.resumeTarget(this.node);
+            //事件管理器，它主要管理事件监听器注册和派发系统事件。
+	    	//原始设计中，它支持鼠标，触摸，键盘，陀螺仪和自定义事件。
+            cc.eventManager.resumeTarget(this.node);//恢复传入的 node 相关的所有监听器的事件响应。
         } else {
-            cc.eventManager.pauseTarget(this.node);
+            cc.eventManager.pauseTarget(this.node);//暂停传入的 node 相关的所有监听器的事件响应
         }
     },
 });

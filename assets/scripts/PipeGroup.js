@@ -15,6 +15,7 @@ cc.Class({
         bottomPipe: cc.Node,
     },
 
+    /** 用于初始化 */
     init(pipeManager) {
         this.pipeManager = pipeManager;
         this._initPositionX();
@@ -26,8 +27,8 @@ cc.Class({
         let visibleSize = cc.director.getVisibleSize(); // 场景可见区域大小
         let sceneLeft = -visibleSize.width / 2; // Canvas锚点在中心，Canvas的左侧就是在锚点左边距离一半宽度的地方
         let sceneRight = visibleSize.width / 2; // Canvas锚点在中心，Canvas的右侧就是在锚点右边距离一半宽度的地方
-        this.node.x = sceneRight + 300;
-        this.recylceX = sceneLeft - Math.max(this.topPipe.width, this.bottomPipe.width);
+        this.node.x = sceneRight + 300;  //这个是距离右侧屏幕的距离(这个地方产生水管) 
+        this.recylceX = sceneLeft - Math.max(this.topPipe.width, this.bottomPipe.width); //回收的x轴范围
     },
 
     /** 设置上、下管道y轴位置以及之间的距离 */
